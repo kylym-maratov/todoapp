@@ -3,11 +3,9 @@ import { LoginPage, SignupPage } from "../pages/AuthPage";
 import DashBoardPage from "../pages/DashBoardPage";
 import ProfilePage from "../pages/ProfilePage";
 
+export default function UseRoutes(isAuth) {
 
-export default function UseRoutes() {
-    const token = false;
-
-    if (token) {
+    if (isAuth) {
         return (
             <Routes>
                 <Route path="/dashboard" element={<DashBoardPage />} />

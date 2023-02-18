@@ -2,26 +2,37 @@ import { Alert, Snackbar } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../store";
 
-
 export const AlertComponent = () => {
-    const { state, dispatch } = useContext(AppContext);
-
-    const { alert } = state;
-
-    const [open, setOpen] = useState(false);
-    const [data, setData] = useState({
-        type: 'error',
-        message: ''
-    });
+    const { state } = useContext(AppContext);
+    const { error, message } = state;
+    const [open, setOpen] = useState();
+    const [type, setType] = useState("info");
 
     useEffect(() => {
+        if (error) {
+            setType("error");
+            return setOpen(true)
+        }
+        if (message) {
+            setType("info");
+            return setOpen(true)
+        }
 
-    }, [state.alert])
+        setOpen(false)
+    }, [error, message])
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setOpen(false);
+        }, 5000)
+
+        return () => clearTimeout(timeout);
+    }, [open])
 
     return (
-        <Snackbar open={open} autoHideDuration={6000} onClose={() => setOpen(false)}>
-            <Alert onClose={() => setOpen(false)} severity={data.type} sx={{ width: '100%' }}>
-                {data.message}
+        <Snackbar open={open}>
+            <Alert onClose={() => setOpen(false)} severity={type} sx={{ width: '100%' }}>
+                {error || message}
             </Alert>
         </Snackbar>
     )

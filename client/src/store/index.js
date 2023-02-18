@@ -1,14 +1,10 @@
 import React from "react";
-
+import { initialAppState } from "./app";
+import { initialUserState } from "./user";
 
 export const initialState = {
-    isDarkTheme: false,
-    alert: {
-        error: "",
-        warning: "",
-        info: "",
-        success: ""
-    }
+    ...initialAppState,
+    ...initialUserState
 };
 
 export const reducer = (state, action) => {
@@ -18,10 +14,30 @@ export const reducer = (state, action) => {
                 ...state,
                 isDarkTheme: action.payload
             }
+        case "SET_LOADING":
+            return {
+                ...state,
+                loading: action.payload
+            }
+        case "SET_MESSAGE":
+            return {
+                ...state,
+                message: action.payload
+            }
         case "SET_ERROR":
             return {
                 ...state,
                 error: action.payload
+            }
+        case "SET_USER_DATA":
+            return {
+                ...state,
+                userData: action.payload
+            }
+        case "SET_ACCESS_TOKEN":
+            return {
+                ...state,
+                userToken: { accessToken: action.payload }
             }
         default:
             return state;

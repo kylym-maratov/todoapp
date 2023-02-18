@@ -4,6 +4,22 @@ const { hashPassword, comparePassword } = require("../utils/bcrypt.util");
 
 class UserService {
 
+    async changeTheme(req, res, next) {
+        try {
+
+        } catch (e) { next(e) }
+    }
+
+    async checkUser(req, res, next) {
+        try {
+            const { username, email } = req.body;
+            const userName = await userSchema.findOne({ username });
+            const userEmail = await userSchema.findOne({ email });
+
+            return res.json({ message: "OK", username: !!userName, email: !!userEmail });
+        } catch (e) { next(e) }
+    }
+
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -21,7 +37,7 @@ class UserService {
             user.password = null;
             user.todos = null;
 
-            return res.json({ message: "OK", user, token: (await generateToken({ userid: user.id })) })
+            return res.json({ message: "OK", user, accessToken: (await generateToken({ userid: user.id })) })
 
         } catch (e) {
             next(e);
@@ -30,19 +46,24 @@ class UserService {
 
     async signup(req, res, next) {
         try {
-            const { email, password } = req.body;
+            const { email, password, username, fisrtname, lastname, phone, theme } = req.body;
 
             const user = await userSchema.findOne({ email });
 
             if (user) {
-                return res.status(400).json({ message: "User exists" });
+                return res.status(400).json({ message: "User with email exists" });
             }
 
             const hashedPassword = await hashPassword(password);
 
             const newUser = new userSchema({
                 email,
-                password: hashedPassword
+                username,
+                password: hashedPassword,
+                fisrtname,
+                lastname,
+                phone,
+                theme
             })
 
             await newUser.save();

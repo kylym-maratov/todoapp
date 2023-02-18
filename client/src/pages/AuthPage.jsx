@@ -2,10 +2,14 @@ import React, { useContext, useState } from "react";
 import { useFormik } from 'formik';
 import * as yup from "yup";
 import { Box } from "@mui/system";
-import { Button, FormGroup, Grow, Slide, Step, StepLabel, Stepper, TextField, Typography } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { AppContext } from "../store";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Link, useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
+import { Loading } from "../components/Loading";
+import { useAxios } from "../api/api";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useAuth } from "../hooks/use.auth";
 
 const style = {
     main: {
@@ -23,161 +27,161 @@ const style = {
     }
 }
 
-const steps = [
-    'Email & password',
-    'Name & username',
-    'Done'
-]
 
 export const SignupPage = () => {
-    const { state } = React.useContext(AppContext);
-    const { isDarkTheme } = state;
-    const navigate = useNavigate();
+    const { state, dispatch } = React.useContext(AppContext);
+    const { isDarkTheme, loading } = state;
     const [activeStep, setActiveStep] = useState(0);
-    const [form, setForm] = useState({
-        email: "",
-        password: "",
-        firstname: "",
-        lastname: "",
-        username: ""
-    });
+    const [created, setCreated] = useState(false);
+    const { requestApi } = useAxios();
+    const navigate = useNavigate();
 
     const validationSchema = yup.object().shape({
         email: yup.string().email().required(),
-        password: yup.string().min(8).max(32).required()
+        password: yup.string().min(8).max(32).required(),
+        username: yup.string().min(3).required(),
+        firstname: yup.string(),
+        lastname: yup.string(),
+        phone: yup.string()
     });
 
     const formik = useFormik({
         initialValues: {
-            email: "", password: ""
+            email: "", password: "", username: "", firstname: "", lastname: "", phone: ""
         },
         validationSchema: validationSchema,
-        onSubmit: (values) => {
-            setForm({ ...form, email: values.email, password: values.password });
-            setActiveStep(1);
-        }
+        onSubmit: submitHandler
     });
 
+    async function submitHandler(values, { resetForm }) {
+        if (activeStep === 0) {
+            const { data } = await requestApi("/api/user/check-user", "POST", { username: values.username, email: values.email });
+            if (!data.username && !data.email) {
+                return setActiveStep(1);
+            }
+            if (data.username) {
+                return dispatch({ type: "SET_ERROR", payload: "User with username exists" })
+            }
+            if (data.email) {
+                return dispatch({ type: "SET_ERROR", payload: "User with email exists" })
+            }
 
-    function nextStep(key) {
-        if (!form.email && !form.email) return;
-        setActiveStep(key);
-    }
+            return dispatch({ type: "SET_ERROR", payload: "Username and email exists" })
+        }
 
-    function formHandler(e) {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    }
-
-    function onSubmitHandler() {
-        setActiveStep(2);
-    }
-
-    function onDoneHandler() {
-        navigate('/');
+        const { data } = await requestApi("/api/user/signup", "POST", { ...values });
+        dispatch({ type: "SET_MESSAGE", payload: data.message });
+        setCreated(true);
+        setTimeout(() => {
+            navigate("/login")
+        }, 3000)
     }
 
     return (
         <>
-            <Box sx={{ width: '100%', marginTop: 6, }}>
-                <Stepper activeStep={activeStep} alternativeLabel>
-                    {steps.map((label, key) => (
-                        <Step key={label}>
-                            <StepLabel
-                                sx={{ cursor: "pointer" }}
-                                onClick={() => nextStep(key)}
-                            >
-                                {label}
-                            </StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
-            </Box>
             <Box sx={{ ...style.main, background: isDarkTheme ? "#212120" : "white" }}>
-                {activeStep === 0 &&
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <img alt="logo" src={logo} style={{ height: "120px", width: "120px", marginBottom: 10 }} />
+                </Box>
+                {activeStep === 0 && <>
+                    <form onSubmit={formik.handleSubmit}>
+                        <Box sx={{ ...style.separate }}>
+                            <TextField type="text" fullWidth label="Email"
+                                id="email"
+                                name="email"
+                                value={formik.values.email}
+                                error={formik.touched.email && Boolean(formik.errors.email)}
+                                onChange={formik.handleChange}
+                                helperText={formik.touched.email && formik.errors.email}
+                            />
+                        </Box>
+                        <Box sx={{ ...style.separate }}>
+                            <TextField type="text" fullWidth label="Username"
+                                id="username"
+                                name="username"
+                                value={formik.values.username}
+                                error={formik.touched.username && Boolean(formik.errors.username)}
+                                onChange={formik.handleChange}
+                                helperText={formik.touched.username && formik.errors.username}
+                            />
+                        </Box>
+                        <Box sx={{ ...style.separate }}>
+                            <TextField type="password" fullWidth label="Password"
+                                id="password"
+                                name="password"
+                                onChange={formik.handleChange}
+                                error={formik.touched.password && Boolean(formik.errors.password)}
+                                value={formik.values.password}
+                                helperText={formik.touched.password && formik.errors.password}
+                            />
+                        </Box>
+                        <Box sx={{ ...style.separate, display: 'flex', justifyContent: 'center' }}>
+                            <Button variant="contained" type="submit" disabled={loading}>Continue</Button>
+                        </Box>
+                    </form>
+                </>
+                }
+                {activeStep === 1 &&
                     <>
                         <form onSubmit={formik.handleSubmit}>
                             <Box sx={{ ...style.separate }}>
-                                <TextField type="text" fullWidth label="Email"
-                                    name="email"
-                                    value={formik.values.email}
-                                    error={formik.touched.email && Boolean(formik.errors.email)}
+                                <TextField type="text" fullWidth label="Firstname"
+                                    id="firstname"
+                                    name="firstname"
+                                    value={formik.values.firstname}
+                                    error={formik.touched.firstname && Boolean(formik.errors.firstname)}
                                     onChange={formik.handleChange}
-                                    helperText={formik.touched.email && formik.errors.email}
+                                    helperText={formik.touched.firstname && formik.errors.firstname}
                                 />
                             </Box>
                             <Box sx={{ ...style.separate }}>
-                                <TextField type="password" fullWidth label="Password"
-                                    id="password"
-                                    name="password"
+                                <TextField type="text" fullWidth label="Lastname"
+                                    id="lastname"
+                                    name="lastname"
+                                    value={formik.values.lastname}
+                                    error={formik.touched.lastname && Boolean(formik.errors.lastname)}
                                     onChange={formik.handleChange}
-                                    error={formik.touched.password && Boolean(formik.errors.password)}
-                                    value={formik.values.password}
-                                    helperText={formik.touched.password && formik.errors.password}
+                                    helperText={formik.touched.lastname && formik.errors.lastname}
+                                />
+                            </Box>
+                            <Box sx={{ ...style.separate }}>
+                                <TextField type="phone" fullWidth label="Phone"
+                                    id="phone"
+                                    name="phone"
+                                    value={formik.values.phone}
+                                    error={formik.touched.phone && Boolean(formik.errors.phone)}
+                                    onChange={formik.handleChange}
+                                    helperText={formik.touched.phone && formik.errors.phone}
                                 />
                             </Box>
                             <Box sx={{ ...style.separate, display: 'flex', justifyContent: 'center' }}>
-                                <Button variant="contained" type="submit">Next</Button>
+                                {created ? <CheckCircleIcon sx={{ height: 50, width: 50, color: "green" }} /> :
+                                    <>{
+                                        loading
+                                            ?
+                                            <Loading />
+                                            :
+                                            <Button variant="contained" type="submit">Done</Button>
+                                    }</>
+                                }
                             </Box>
                         </form>
-                        <Typography sx={{ fontSize: 12, textAlign: "center" }}>
-                            You have account? <Link to="/">/Login</Link>
-                        </Typography>
                     </>
                 }
-                {
-                    activeStep === 1
-                    &&
-                    <Slide direction="left" in={true} mountOnEnter unmountOnExit>
-                        <FormGroup>
-                            <Box sx={{ ...style.separate }}>
-                                <TextField fullWidth label="Firstname" name="firstname"
-                                    value={form.firstname}
-                                    onChange={formHandler}
-                                />
-                            </Box>
-                            <Box sx={{ ...style.separate }}>
-                                <TextField fullWidth label="Lastname" name="lastname"
-                                    value={form.lastname}
-                                    onChange={formHandler}
-                                />
-                            </Box>
-                            <Box sx={{ ...style.separate }}>
-                                <TextField fullWidth label="Username" name="username"
-                                    value={form.username}
-                                    onChange={formHandler}
-                                />
-                            </Box>
-                            <Box sx={{ ...style.separate, display: 'flex', justifyContent: 'center' }}>
-                                <Button variant="contained" type="submit" onClick={onSubmitHandler}>{!form.firstname || !form.lastname || !form.username ? "Skip" : "Next"}</Button>
-                            </Box>
-                        </FormGroup>
-                    </Slide>
-                }
-                {activeStep === 2
-                    &&
-                    <>
-                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <Grow in={true}>
-                                <CheckCircleIcon sx={{ fontSize: 100, color: 'green' }} />
-                            </Grow>
-                        </Box>
-                        <Typography textAlign="center">
-                            You are successfully registered!
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
-                            <Button variant="contained" type="button" onClick={onDoneHandler}>Done</Button>
-                        </Box>
-                    </>
-                }
-            </Box >
+                <Typography sx={{ fontSize: 12, textAlign: "center", marginTop: 5 }}>
+                    You have account? <Link to="/login">/Login</Link>
+                </Typography>
+            </Box>
         </>
     )
 }
 
 
 export const LoginPage = () => {
-    const { state } = useContext(AppContext);
-    const { isDarkTheme } = state;
+    const { state, dispatch } = useContext(AppContext);
+    const { isDarkTheme, loading } = state;
+    const { requestApi } = useAxios();
+    const { login } = useAuth();
 
     const validationSchema = yup.object().shape({
         email: yup.string().email().required(),
@@ -189,12 +193,21 @@ export const LoginPage = () => {
             email: "", password: ""
         },
         validationSchema: validationSchema,
-        onSubmit: (values) => { }
+        onSubmit: submitHandler
     });
+
+    async function submitHandler(values) {
+        const { data } = await requestApi("/api/user/login", "POST", { ...values });
+
+        login(data.user, { accessToken: data.accessToken });
+    }
 
     return (
         <>
             <Box sx={{ ...style.main, background: isDarkTheme ? "#212120" : "white" }}>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <img alt="logo" src={logo} style={{ height: "120px", width: "120px", marginBottom: 10 }} />
+                </Box>
                 <form onSubmit={formik.handleSubmit}>
                     <Box sx={{ ...style.separate }}>
                         <TextField type="text" fullWidth label="Email"
@@ -218,10 +231,16 @@ export const LoginPage = () => {
                         <Link> <Typography fontSize={12}>Forgot password?</Typography></Link>
                     </Box>
                     <Box sx={{ ...style.separate, display: 'flex', justifyContent: 'center' }}>
-                        <Button variant="contained" type="submit">Login</Button>
+                        {
+                            loading
+                                ?
+                                <Loading />
+                                :
+                                <Button variant="contained" type="submit">Login</Button>
+                        }
                     </Box>
                 </form>
-                <Typography sx={{ fontSize: 12, textAlign: "center" }}>
+                <Typography sx={{ fontSize: 12, textAlign: "center", marginTop: 10 }}>
                     You don't have account? <Link to="/signup">/Signup</Link>
                 </Typography>
             </Box>
