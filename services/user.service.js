@@ -1,24 +1,46 @@
+const userSchema = require("../databases/schemas/user.schema");
+const { generateToken } = require("../utils/token.util");
+const { hashPassword, comparePassword } = require("../utils/bcrypt.util");
 
 class UserService {
-    constructor({ schema, bcrypt, token }) {
-        this.schema = schema;
-        this.bcrypt = bcrypt;
-        this.token = token;
+
+    async login(req, res, next) {
+        try {
+            const { email, password } = req.body;
+
+            const user = await userSchema.findOne({ email });
+
+            if (!user) {
+                return res.status(400).json({ message: "User not found" });
+            }
+
+            if (!(await comparePassword(password, user.password))) {
+                return res.status(400).json({ message: "Icorrect login data" });
+            }
+
+            user.password = null;
+            user.todos = null;
+
+            return res.json({ message: "OK", user, token: (await generateToken({ userid: user.id })) })
+
+        } catch (e) {
+            next(e);
+        }
     }
 
     async signup(req, res, next) {
         try {
             const { email, password } = req.body;
 
-            const user = await this.schema.findOne({ email });
+            const user = await userSchema.findOne({ email });
 
             if (user) {
                 return res.status(400).json({ message: "User exists" });
             }
 
-            const hashedPassword = await this.bcrypt.hashPassword(password);
+            const hashedPassword = await hashPassword(password);
 
-            const newUser = new this.schema({
+            const newUser = new userSchema({
                 email,
                 password: hashedPassword
             })
@@ -30,11 +52,8 @@ class UserService {
             next(e);
         }
     }
-
-    async login(req, res) {
-
-    }
 }
+
 
 
 module.exports = UserService;
