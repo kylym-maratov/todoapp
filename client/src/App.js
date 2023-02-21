@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 //
 import CssBaseline from '@mui/material/CssBaseline';
 import { darkTheme, lightTheme } from "./utils/theme.util";
@@ -11,9 +11,9 @@ import { AlertComponent } from "./components/Alert";
 
 function App() {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { isDarkTheme, userToken } = state;
+  const { isDarkTheme, accessToken } = state;
 
-  const routes = UseRoutes(!!userToken);
+  const routes = UseRoutes(!!accessToken);
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
@@ -24,7 +24,7 @@ function App() {
         </BrowserRouter>
       </ThemeProvider>
       <AlertComponent />
-      <SpeedDialComponent />
+      {!!accessToken && <SpeedDialComponent />}
     </AppContext.Provider>
   );
 }

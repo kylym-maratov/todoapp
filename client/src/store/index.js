@@ -9,7 +9,7 @@ export const initialState = {
 
 export const reducer = (state, action) => {
     switch (action.type) {
-        case "CHANGE_THEME":
+        case "SET_THEME":
             return {
                 ...state,
                 isDarkTheme: action.payload
@@ -37,7 +37,12 @@ export const reducer = (state, action) => {
         case "SET_ACCESS_TOKEN":
             return {
                 ...state,
-                userToken: { accessToken: action.payload }
+                accessToken: action.payload
+            }
+        case "SET_USER_THEME":
+            return {
+                ...state,
+                userData: { isDarkTheme: action.payload }
             }
         default:
             return state;

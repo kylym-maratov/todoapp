@@ -1,44 +1,44 @@
 import axios from "axios";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext } from "../store";
 import { getLocalItem } from "../utils/storage.util";
 
 
 export const useAxios = () => {
     const { dispatch } = useContext(AppContext);
-    const user = getLocalItem("userData");
 
-    axios.defaults.baseURL = "/";
+    useEffect(() => {
+        axios.interceptors.request.use(function (config) {
+            dispatch({ type: "SET_LOADING", payload: true });
+            dispatch({ type: "SET_ERROR", payload: "" });
+            config.headers.set("Content-Type", "application/json");
 
-    axios.interceptors.request.use(function (config) {
-        dispatch({ type: "SET_LOADING", payload: true })
-        dispatch({ type: "SET_ERROR", payload: "" })
-        config.headers.set("Content-Type", "application/json");
+            const accesstoken = getLocalItem("accesstoken");
 
-        if (user && user.token) {
-            config.headers.set("Authorization", "Bearer " + user.token)
-        }
+            if (accesstoken) {
+                config.headers.set("authorization", accesstoken)
+            }
 
-        return config;
-    }, function (error) {
-
-        return Promise.reject(error);
-    });
-
-
-    axios.interceptors.response.use(function (response) {
-        dispatch({ type: "SET_LOADING", payload: false })
-        return response;
-    }, function (error) {
-
-        dispatch({ type: "SET_LOADING", payload: false })
-        dispatch({ type: "SET_ERROR", payload: error.response.data.message || error.message })
-        return Promise.reject(error);
-    });
+            return config;
+        }, function (error) {
+            return Promise.reject(error);
+        });
 
 
-    const requestApi = (url = "", method = "GET", data = null, headers = {}) => {
-        return axios.request({ url, method, data: JSON.stringify(data), headers });
+        axios.interceptors.response.use(function (response) {
+            dispatch({ type: "SET_LOADING", payload: false });
+            return response;
+
+        }, function (error) {
+            dispatch({ type: "SET_ERROR", payload: error.response.data.message || error.message })
+            dispatch({ type: "SET_LOADING", payload: false });
+            return Promise.reject(error);
+        });
+    }, [])
+
+
+    const requestApi = async (url = "", method = "GET", data) => {
+        return await axios.request({ url, method, data: JSON.stringify(data ? data : {}) });
     }
 
     return { requestApi };

@@ -7,6 +7,6 @@ module.exports = model("users", new Schema({
     firstname: { type: String, default: "User" },
     lastname: { type: String, default: "User" },
     phone: { type: String, default: "" },
-    theme: { type: String, default: "light" },
+    isDarkTheme: { type: Boolean, default: false },
     todos: { type: Array, default: [] },
 }, { timestamps: true }));

@@ -7,26 +7,26 @@ export const useAuth = () => {
 
     useEffect(() => {
         const userData = getLocalItem("userdata");
-        const userToken = getLocalItem("usertoken");
-        console.log(userData, userToken)
+        const accessToken = getLocalItem("accesstoken");
 
-        if (userData && userToken) {
-            login(userData, userToken);
+
+        if (userData && accessToken) {
+            login(userData, accessToken);
         }
     }, [])
 
-    function login(userData, userToken) {
-        dispatch({ type: "SET_USERDATA", payload: userData });
-        dispatch({ type: "SET_ACCESS_TOKEN", payload: userToken.accessToken });
+    function login(userData, accessToken) {
+        dispatch({ type: "SET_USER_DATA", payload: userData });
+        dispatch({ type: "SET_ACCESS_TOKEN", payload: accessToken });
         setLocalItem("userdata", userData);
-        setLocalItem("usertoken", userToken);
+        setLocalItem("accesstoken", accessToken);
     }
 
     function logout() {
         dispatch({ type: "SET_USER_DATA", payload: null });
         dispatch({ type: "SET_ACCESS_TOKEN", payload: "" });
         destroyLocalItem("userdata");
-        destroyLocalItem("usertoken");
+        destroyLocalItem("accesstoken");
     }
 
     return { login, logout }

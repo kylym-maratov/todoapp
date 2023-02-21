@@ -10,3 +10,14 @@ export function getLocalItem(key) {
 export function destroyLocalItem(key) {
     localStorage.removeItem(key);
 }
+
+
+export function updateLocalItem(key, value) {
+    const data = getLocalItem(key);
+
+    destroyLocalItem(key);
+
+    const newData = { ...data, ...value };
+
+    setLocalItem(key, newData);
+}

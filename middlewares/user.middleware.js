@@ -15,5 +15,12 @@ const isAuthCorrectMiddleware = [
     }
 ]
 
+function themeMiddleware(req, res, next) {
+    let theme = (req.query.theme === "true");
 
-module.exports = { isAuthCorrectMiddleware };
+    if (typeof theme !== "boolean") return res.status(400).json({ message: "Theme field required" });
+
+    next()
+}
+
+module.exports = { isAuthCorrectMiddleware, themeMiddleware };

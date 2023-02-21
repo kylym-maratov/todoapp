@@ -12,9 +12,9 @@ function generateToken(data) {
 };
 
 
-function decodeToken(token) {
+function validToken(token) {
     return new Promise((res, rej) => {
-        jwt.decode(token, process.env.TOKEN_SECRET, (err, decoded) => {
+        jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
             if (err) rej(err);
 
             res(decoded);
@@ -24,4 +24,4 @@ function decodeToken(token) {
 
 
 
-module.exports = { generateToken, decodeToken };
+module.exports = { generateToken, validToken };

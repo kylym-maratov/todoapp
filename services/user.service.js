@@ -3,10 +3,28 @@ const { generateToken } = require("../utils/token.util");
 const { hashPassword, comparePassword } = require("../utils/bcrypt.util");
 
 class UserService {
+    async getUser(req, res, next) {
+        try {
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            user.password = null;
+
+            return res.json({ message: "OK", user });
+        } catch (e) {
+            next(e);
+        }
+    }
 
     async changeTheme(req, res, next) {
         try {
+            const userid = req.userid;
+            const { theme } = req.query;
 
+            await userSchema.findOneAndUpdate({ _id: userid }, { $set: { isDarkTheme: theme } });
+
+            return res.json({ message: `Theme changed`, isDarkTheme: (theme === "true") });
         } catch (e) { next(e) }
     }
 
