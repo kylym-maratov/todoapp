@@ -44,6 +44,11 @@ export const reducer = (state, action) => {
                 ...state,
                 userData: { ...state.userData, isDarkTheme: action.payload }
             }
+        case "SET_OPEN_MENU":
+            return {
+                ...state,
+                openMenu: action.payload
+            }
         default:
             return state;
     }

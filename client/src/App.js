@@ -8,6 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 import UseRoutes from "./routes/use.routes";
 import { SpeedDialComponent } from "./components/SpeeDial";
 import { AlertComponent } from "./components/Alert";
+import { Menu } from "./components/Menu";
 
 function App() {
   const [state, dispatch] = React.useReducer(reducer, initialState);
@@ -25,6 +26,7 @@ function App() {
       </ThemeProvider>
       <AlertComponent />
       {!!accessToken && <SpeedDialComponent />}
+      <Menu />
     </AppContext.Provider>
   );
 }

@@ -26,6 +26,7 @@ const style = {
     }
 }
 
+
 export const LoginPage = () => {
     const { state } = useContext(AppContext);
     const { isDarkTheme, loading } = state;

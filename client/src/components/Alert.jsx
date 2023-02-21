@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../store";
 
 export const AlertComponent = () => {
-    const { state } = useContext(AppContext);
+    const { state, dispatch } = useContext(AppContext);
     const { error, message } = state;
     const [open, setOpen] = useState();
     const [type, setType] = useState("info");
@@ -23,15 +23,21 @@ export const AlertComponent = () => {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            setOpen(false);
+            closeAlert()
         }, 5000)
 
         return () => clearTimeout(timeout);
     }, [open])
 
+    function closeAlert() {
+        setOpen(false);
+        dispatch({ type: "SET_MESSAGE", payload: "" });
+        dispatch({ type: "SET_ERROR", payload: "" });
+    }
+
     return (
         <Snackbar open={open}>
-            <Alert onClose={() => setOpen(false)} severity={type} sx={{ width: '100%' }}>
+            <Alert onClose={closeAlert} severity={type} sx={{ width: '100%' }}>
                 {error || message}
             </Alert>
         </Snackbar>

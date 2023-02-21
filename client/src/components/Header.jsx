@@ -28,7 +28,6 @@ export const Header = () => {
                 TodoApp
             </Typography>
             <Box sx={{ ...style.section }}>
-                <Typography>@{userData.username}</Typography>
                 <UserBlock />
             </Box>
         </Box>

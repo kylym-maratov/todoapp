@@ -1,6 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../store";
 import Avatar from '@mui/material/Avatar';
+import { IconButton, ListItemButton, Typography } from "@mui/material";
+import MenuIcon from '@mui/icons-material/Menu';
+import { Link } from "react-router-dom";
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Box } from "@mui/system";
 
 function stringToColor(string) {
     let hash = 0;
@@ -33,13 +38,30 @@ function stringAvatar(name) {
 
 
 export const UserBlock = () => {
-    const { state } = useContext(AppContext);
-
+    const { state, dispatch } = useContext(AppContext);
     const { userData } = state;
+    const [welcome, setWelcome] = useState(true);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => setWelcome(false), 5000);
+
+        return () => clearTimeout(timeout);
+    }, []);
+
+    function openMenu() {
+        dispatch({ type: "SET_OPEN_MENU", payload: true })
+    }
 
     return (
         <>
-            <Avatar {...stringAvatar(userData.firstname + " " + userData.lastname)} alt={userData.username} />
+            <IconButton type="button" sx={{ marginRight: 2 }}>
+                <NotificationsIcon />
+            </IconButton>
+            <Typography sx={{ marginRight: 2, fontSize: 14, display: welcome ? "block" : "none" }}>Welcome!</Typography>
+            <Link to="/profile" style={{ textDecoration: "none" }}><Avatar {...stringAvatar(userData.firstname + " " + userData.lastname)} alt={userData.username} /></Link>
+            <IconButton type="button" sx={{ marginLeft: 1 }} onClick={openMenu}>
+                <MenuIcon />
+            </IconButton>
         </>
     )
 }

@@ -4,5 +4,6 @@ export const initialAppState = {
     isDarkTheme: false,
     loading: false,
     error: "",
-    message: ""
+    message: "",
+    openMenu: false
 }
