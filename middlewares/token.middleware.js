@@ -22,7 +22,6 @@ async function tokenMiddleware(req, res, next) {
 
         next();
     } catch (e) {
-        console.log(e);
         next(e)
     }
 }

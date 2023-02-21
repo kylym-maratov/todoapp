@@ -1,8 +1,13 @@
+import { IconButton } from "@mui/material";
 import React from "react";
-
+import AddIcon from '@mui/icons-material/Add';
 
 export const AddItem = () => {
     return (
-        <div>da</div>
+        <>
+            <IconButton type="button">
+                <AddIcon />
+            </IconButton>
+        </>
     )
 }

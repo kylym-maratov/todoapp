@@ -42,7 +42,7 @@ export const reducer = (state, action) => {
         case "SET_USER_THEME":
             return {
                 ...state,
-                userData: { isDarkTheme: action.payload }
+                userData: { ...state.userData, isDarkTheme: action.payload }
             }
         default:
             return state;

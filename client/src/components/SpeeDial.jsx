@@ -10,15 +10,9 @@ const actions = [
     { icon: <DarkModeIcon />, name: "DarkMode" }
 ]
 
-function boolTheme(theme) {
-    if (theme === "light") return false;
-
-    return true
-}
-
 export const SpeedDialComponent = () => {
     const { state, dispatch } = useContext(AppContext);
-    const { isDarkTheme, userData } = state;
+    const { userData } = state;
     const { requestApi } = useAxios();
 
     const [open, setOpen] = useState(false);

@@ -1,19 +1,21 @@
 import { useContext, useEffect } from "react"
 import { AppContext } from "../store"
-import { destroyLocalItem, getLocalItem, setLocalItem } from "../utils/storage.util";
+import { destroyLocalItem, getLocalItem, setLocalItem, updateLocalItem } from "../utils/storage.util";
 
 export const useAuth = () => {
-    const { dispatch } = useContext(AppContext);
+    const { dispatch, state } = useContext(AppContext);
+
 
     useEffect(() => {
         const userData = getLocalItem("userdata");
         const accessToken = getLocalItem("accesstoken");
 
-
         if (userData && accessToken) {
             login(userData, accessToken);
         }
-    }, [])
+
+    }, [state.userData, login])
+
 
     function login(userData, accessToken) {
         dispatch({ type: "SET_USER_DATA", payload: userData });
@@ -28,6 +30,7 @@ export const useAuth = () => {
         destroyLocalItem("userdata");
         destroyLocalItem("accesstoken");
     }
+
 
     return { login, logout }
 }
