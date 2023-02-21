@@ -1,10 +1,12 @@
 import React from "react";
 import { initialAppState } from "./app";
+import { initialTodoState } from "./todos";
 import { initialUserState } from "./user";
 
 export const initialState = {
     ...initialAppState,
-    ...initialUserState
+    ...initialUserState,
+    ...initialTodoState
 };
 
 export const reducer = (state, action) => {
@@ -48,6 +50,11 @@ export const reducer = (state, action) => {
             return {
                 ...state,
                 openMenu: action.payload
+            }
+        case "SET_TODOS":
+            return {
+                ...state,
+                todos: action.payload
             }
         default:
             return state;

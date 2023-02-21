@@ -7,6 +7,7 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import { useAxios } from "../api/api";
 
 const style = {
     main: {
@@ -25,14 +26,11 @@ const style = {
     }
 }
 
-const editorOptions = {
-
-}
-
 
 export const AddItem = () => {
     const { state, dispatch } = useContext(AppContext);
     const { isDarkTheme } = state;
+    const { requestApi } = useAxios();
 
     const [showForm, setShowForm] = useState(false);
     const [descState, setDescState] = useState("");
@@ -57,6 +55,14 @@ export const AddItem = () => {
     function onDiscard() {
         onClearFields();
         setShowForm(false);
+    }
+
+    async function onCreateTodo() {
+        const { data } = await requestApi("/api/todo/create", "POST", { title, description: onDecodeDrafjs() });
+        dispatch({ type: "SET_MESSAGE", payload: data.message });
+        const newTodos = await requestApi("/api/todo/todos");
+        dispatch({ type: "SET_TODOS", payload: newTodos.data.todos });
+        onDiscard()
     }
 
     return (
@@ -93,10 +99,9 @@ export const AddItem = () => {
                             <Box>
                                 <ButtonGroup>
                                     <Button variant="text" onClick={onDiscard} sx={{ color: "red" }}>Discard</Button>
-                                    <Button variant="text">Save</Button>
+                                    <Button variant="text" onClick={onCreateTodo}>Save</Button>
                                 </ButtonGroup>
                             </Box>
-
                         </Box>
                     </Box>}
                 </form>

@@ -53,7 +53,7 @@ class UserService {
             }
 
             user.password = null;
-            user.todos = null;
+            user.todos = [];
 
             return res.json({ message: "OK", user, accessToken: (await generateToken({ userid: user.id })) })
 
