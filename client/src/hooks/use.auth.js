@@ -14,7 +14,7 @@ export const useAuth = () => {
             login(userData, accessToken);
         }
 
-    }, [state.userData])
+    }, [])
 
 
     function login(userData, accessToken) {
