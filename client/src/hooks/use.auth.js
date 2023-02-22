@@ -27,6 +27,7 @@ export const useAuth = () => {
     function logout() {
         dispatch({ type: "SET_USER_DATA", payload: null });
         dispatch({ type: "SET_ACCESS_TOKEN", payload: "" });
+        dispatch({ type: "SET_TODOS", payload: [] });
         destroyLocalItem("userdata");
         destroyLocalItem("accesstoken");
     }

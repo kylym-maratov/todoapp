@@ -27,7 +27,7 @@ const style = {
 }
 
 
-export const AddItem = () => {
+export const AddItem = ({ fetchTodos }) => {
     const { state, dispatch } = useContext(AppContext);
     const { isDarkTheme } = state;
     const { requestApi } = useAxios();
@@ -60,9 +60,8 @@ export const AddItem = () => {
     async function onCreateTodo() {
         const { data } = await requestApi("/api/todo/create", "POST", { title, description: onDecodeDrafjs() });
         dispatch({ type: "SET_MESSAGE", payload: data.message });
-        const newTodos = await requestApi("/api/todo/todos");
-        dispatch({ type: "SET_TODOS", payload: newTodos.data.todos });
-        onDiscard()
+        onDiscard();
+        fetchTodos();
     }
 
     return (

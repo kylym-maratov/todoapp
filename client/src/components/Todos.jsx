@@ -7,7 +7,9 @@ import { useContext, useEffect } from "react";
 import { AppContext } from "../store";
 import { Loading } from "./Loading";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PushPinIcon from '@mui/icons-material/PushPin';
 
 const style = {
     menu: {
@@ -17,19 +19,13 @@ const style = {
     }
 }
 
-export const Todos = () => {
-    const { state, dispatch } = useContext(AppContext);
-    const { requestApi } = useAxios();
+export const Todos = ({ fetchTodos }) => {
+    const { state } = useContext(AppContext);
     const { todos, loading } = state;
 
     useEffect(() => {
         fetchTodos()
     }, [])
-
-    async function fetchTodos() {
-        const { data } = await requestApi("/api/todo/todos");
-        dispatch({ type: "SET_TODOS", payload: data.todos });
-    }
 
     return (
         <Box>
@@ -65,7 +61,6 @@ export const Todos = () => {
 
 
 const Todo = ({ item }) => {
-
     return (
         <>
             <Accordion>
@@ -81,6 +76,11 @@ const Todo = ({ item }) => {
                         {item.description}
                     </Typography>
                 </AccordionDetails>
+                <ButtonGroup sx={{ padding: 1 }}>
+                    <IconButton type="button"><EditIcon /></IconButton>
+                    <IconButton type="button"><PushPinIcon /></IconButton>
+                    <IconButton type="button"><DeleteIcon /></IconButton>
+                </ButtonGroup>
             </Accordion>
         </>
     )
