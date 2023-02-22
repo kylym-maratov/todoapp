@@ -1,9 +1,21 @@
 const userSchema = require("../databases/schemas/user.schema");
 const todoSchema = require("../databases/schemas/todo.schema");
 
-
-
 class ToodService {
+
+    async deleteTodo(req, res, next) {
+        try {
+            const { todoid } = req.query;
+            const userid = req.userid;
+
+            await todoSchema.deleteOne({ _id: todoid });
+
+            await userSchema.updateOne({ _id: userid }, { $pull: { todos: todoid } });
+
+            return res.json({ message: "Todo deleted" });
+        } catch (e) { next(e) }
+    }
+
     async getTodos(req, res, next) {
         try {
             const userid = req.userid;

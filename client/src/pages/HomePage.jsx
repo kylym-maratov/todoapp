@@ -13,7 +13,7 @@ const style = {
         justifyContent: "center"
     },
     todos: {
-        marginTop: 10,
+        marginTop: 5,
         padding: "0px 5px"
     }
 }

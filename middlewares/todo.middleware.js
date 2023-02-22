@@ -14,4 +14,22 @@ const isTodoCorrectMiddleware = [
     }
 ]
 
-module.exports = { isTodoCorrectMiddleware }
+const isTodoIdMiddlware = [
+    check("todoid").notEmpty().withMessage({ message: "Todo id required" }),
+    function (req, res, next) {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ message: "Fields cannot be empty", errors: errors.array() });
+        }
+
+        next();
+    }
+]
+
+
+function isTodoUpdateTypeMiddleware(req, res, next) {
+
+}
+
+module.exports = { isTodoCorrectMiddleware, isTodoIdMiddlware }
