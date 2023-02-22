@@ -1,1 +1,2 @@
 ### Server-side todoapp
+The backend part of the todoapp application is a REST API. To run applications, create a `.env`file with fields like in `.env.example`. And run the `npm start` command. It is designed in a way that you can easily change some parts to suit your needs.
