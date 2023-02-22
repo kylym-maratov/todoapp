@@ -38,7 +38,7 @@ export const SpeedDialComponent = () => {
             <Backdrop open={open} />
             <SpeedDial
                 ariaLabel="SpeedDial"
-                sx={{ position: 'absolute', bottom: 16, right: 16 }}
+                sx={{ position: 'fixed', bottom: 16, right: 16 }}
                 icon={<SettingsIcon />}
                 onClose={handleClose}
                 onOpen={handleOpen}

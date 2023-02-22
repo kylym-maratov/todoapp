@@ -19,13 +19,14 @@ const style = {
 }
 
 export default function HomePape() {
-    const { dispatch } = useContext(AppContext);
+    const { dispatch, state } = useContext(AppContext);
     const { requestApi } = useAxios();
 
     async function fetchTodos() {
         const { data } = await requestApi("/api/todo/todos");
         dispatch({ type: "SET_TODOS", payload: data.todos });
     }
+
 
     return (
         <>
