@@ -1,12 +1,13 @@
 const { Router } = require("express");
-const { isTodoCorrectMiddleware, isTodoIdMiddlware } = require("../../middlewares/todo.middleware");
+const { isTodoCorrectMiddleware, isTodoIdMiddlware, isTodoTitleUpdateMiddleware } = require("../../middlewares/todo.middleware");
 const todoSerivce = require("../../services/todo.service");
 
 const todoController = Router();
 
 todoController.get("/todos", todoSerivce.getTodos);
 todoController.post("/create", isTodoCorrectMiddleware, todoSerivce.createTodo)
-todoController.delete("/delete", isTodoIdMiddlware, todoSerivce.deleteTodo);
-todoController.put("/update", [isTodoIdMiddlware])
+todoController.delete("/delete", isTodoIdMiddlware.filter((item, i) => i !== 1 && i !== 2), todoSerivce.deleteTodo);
+todoController.put("/update-title", isTodoIdMiddlware.filter((item, i) => i !== 2), todoSerivce.updateTitle);
+todoController.put("/update-description", isTodoIdMiddlware.filter((item, i) => i !== 1), todoSerivce.updateDescritpion)
 
 module.exports = todoController;

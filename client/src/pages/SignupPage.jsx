@@ -9,6 +9,7 @@ import logo from "../assets/logo.png";
 import { Loading } from "../components/Loading";
 import { useAxios } from "../api/api";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useAuth } from "../hooks/use.auth";
 
 const style = {
     main: {
@@ -16,7 +17,7 @@ const style = {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 500,
+        width: 400,
         boxShadow: 2,
         borderRadius: 3,
         p: 4,
@@ -33,7 +34,8 @@ export const SignupPage = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [created, setCreated] = useState(false);
     const { requestApi } = useAxios();
-    const navigate = useNavigate();
+    const { login } = useAuth()
+
 
     const validationSchema = yup.object().shape({
         email: yup.string().email().required(),
@@ -72,7 +74,9 @@ export const SignupPage = () => {
         dispatch({ type: "SET_MESSAGE", payload: data.message });
         setCreated(true);
         setTimeout(() => {
-            navigate("/login")
+            requestApi("/api/user/login", "POST", { ...values }).then(({ data }) => {
+                login(data.user, data.accessToken)
+            })
         }, 3000)
     }
 

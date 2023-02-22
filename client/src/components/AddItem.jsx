@@ -58,9 +58,9 @@ export const AddItem = ({ fetchTodos }) => {
     }
 
     async function onCreateTodo() {
+        onDiscard();
         const { data } = await requestApi("/api/todo/create", "POST", { title, description: onDecodeDrafjs() });
         dispatch({ type: "SET_MESSAGE", payload: data.message });
-        onDiscard();
         fetchTodos();
     }
 

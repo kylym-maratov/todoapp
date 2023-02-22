@@ -3,10 +3,44 @@ const todoSchema = require("../databases/schemas/todo.schema");
 
 class ToodService {
 
+    async updateTitle(req, res, next) {
+        try {
+            const { title, todoid } = req.body;
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+            const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { title } }, { new: true });
+
+            return res.json({ message: "Todo title updated", todo })
+        } catch (e) { next(e) }
+    }
+
+    async updateDescritpion(req, res, next) {
+        try {
+            const { description, todoid } = req.body;
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+            const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { description } }, { new: true });
+
+            return res.json({ message: "Todo description updated", todo })
+        } catch (e) { next(e) }
+    }
+
     async deleteTodo(req, res, next) {
         try {
-            const { todoid } = req.query;
+            const { todoid } = req.body;
             const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             await todoSchema.deleteOne({ _id: todoid });
 
@@ -26,7 +60,9 @@ class ToodService {
 
             for (let todoid of user.todos) {
                 const todo = await todoSchema.findOne({ _id: todoid });
-                todos.push(todo);
+                if (todo) {
+                    todos.push(todo);
+                }
             }
 
             return res.json({ message: "OK", todos });
@@ -44,7 +80,7 @@ class ToodService {
             })
             await newTodo.save()
 
-            await userSchema.updateOne({ _id: userid }, { $push: { todos: newTodo._id } });
+            await userSchema.updateOne({ _id: userid }, { $push: { todos: newTodo._id.toString() } });
 
             return res.json({ message: "Todo created" });
         } catch (e) { next(e) }

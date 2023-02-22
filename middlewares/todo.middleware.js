@@ -16,6 +16,8 @@ const isTodoCorrectMiddleware = [
 
 const isTodoIdMiddlware = [
     check("todoid").notEmpty().withMessage({ message: "Todo id required" }),
+    check("title").notEmpty().withMessage({ message: "New title required" }),
+    check("description").notEmpty().withMessage({ message: "New description required" }),
     function (req, res, next) {
         const errors = validationResult(req);
 
@@ -28,8 +30,5 @@ const isTodoIdMiddlware = [
 ]
 
 
-function isTodoUpdateTypeMiddleware(req, res, next) {
-
-}
 
 module.exports = { isTodoCorrectMiddleware, isTodoIdMiddlware }

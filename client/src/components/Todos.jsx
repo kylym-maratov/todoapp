@@ -29,7 +29,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 
-function dateNormolaize(createdAt) {
+function dateNormalaize(createdAt) {
     const date = createdAt.split("T")[0];
     const time = createdAt.split("T")[1].split(".")[0];
 
@@ -66,14 +66,14 @@ export const Todos = ({ fetchTodos }) => {
                     {view === "list" ?
                         <Box sx={{ marginTop: 3 }}>
                             {todos.map((item, key) => (
-                                <TodoList item={item} key={key} />
+                                <TodoList item={item} key={item._id} />
                             ))}
                         </Box>
                         :
                         <Box sx={{ marginTop: 3 }}>
                             <Grid container sx={{ display: "flex", justifyContent: "center" }}>
                                 {todos.map((item, key) => (
-                                    <Grid key={key}  >
+                                    <Grid key={item._id}  >
                                         <Item><TodoCard item={item} /></Item>
                                     </Grid>
                                 ))}
@@ -99,7 +99,7 @@ export const Todos = ({ fetchTodos }) => {
 
 const TodoList = ({ item }) => {
     const { title, description, createdAt } = item;
-    const { date, time } = useMemo(() => dateNormolaize(createdAt));
+    const { date, time } = useMemo(() => dateNormalaize(createdAt));
 
     return (
         <>
@@ -134,15 +134,50 @@ const TodoList = ({ item }) => {
 
 
 const TodoCard = ({ item }) => {
+    const { dispatch } = useContext(AppContext);
+    const { requestApi } = useAxios();
     const { title, description, createdAt } = item;
+
     const [form, setForm] = useState({
         title, description
-    })
+    });
     const [editMode, setEditMode] = useState({
         title: false, description: false
-    })
+    });
 
-    const { date, time } = useMemo(() => dateNormolaize(createdAt));
+    const { date, time } = useMemo(() => dateNormalaize(createdAt));
+
+    async function deleteTodo(e) {
+        const todoid = item._id;
+
+        if (!todoid) return;
+
+        const { data } = await requestApi("/api/todo/delete", "DELETE", { todoid });
+        const todos = await requestApi("/api/todo/todos");
+
+        dispatch({ type: "SET_TODOS", payload: todos.data.todos });
+        dispatch({ type: "SET_MESSAGE", payload: data.message })
+    }
+
+    async function onAcceptTitleChanged() {
+        const todoid = item._id;
+
+        if (!todoid) return;
+        setEditMode({ ...editMode, title: false })
+        const { data } = await requestApi("/api/todo/update-title", "PUT", { todoid, title: form.title })
+
+        dispatch({ type: "SET_MESSAGE", payload: data.message })
+    }
+
+    async function onAcceptDescriptionChanged() {
+        const todoid = item._id;
+
+        if (!todoid) return;
+        setEditMode({ ...editMode, description: false })
+        const { data } = await requestApi("/api/todo/update-description", "PUT", { todoid, description: form.description });
+
+        dispatch({ type: "SET_MESSAGE", payload: data.message })
+    }
 
     return (
         <Card sx={{ width: 350, borderRadius: 4 }}>
@@ -154,9 +189,9 @@ const TodoCard = ({ item }) => {
                             <TextField fullWidth
                                 type="text" value={form.title}
                                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                onBlur={() => setEditMode({ ...editMode, title: false })}
+                                onKeyDown={(e) => e.key === "Enter" ? onAcceptTitleChanged() : null}
                             />
-                            <IconButton type="button" sx={{ marginTop: 1 }} onClick={() => setEditMode({ ...editMode, title: false })}><DownloadDoneIcon /></IconButton>
+                            <IconButton type="button" sx={{ marginTop: 1 }} onClick={onAcceptTitleChanged}><DownloadDoneIcon /></IconButton>
                         </Box>
                         :
                         <Typography
@@ -164,7 +199,7 @@ const TodoCard = ({ item }) => {
                             onDoubleClick={() => setEditMode({ ...editMode, title: true })}
                             onTouchEnd={() => setEditMode({ ...editMode, title: true })}
                         >
-                            {title}
+                            {form.title}
                         </Typography>
                 }
                 {
@@ -172,24 +207,25 @@ const TodoCard = ({ item }) => {
                         ?
                         <Box display="flex">
                             <TextareaAutosize
-                                onBlur={() => setEditMode({ ...editMode, description: false })}
                                 style={{ width: "100%", resize: "vertical", background: "none", color: "gray", padding: 10, fontSize: 14 }}
-                                type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                            <IconButton type="button" onClick={() => setEditMode({ ...editMode, description: false })}><DownloadDoneIcon /></IconButton>
+                                type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                                onKeyDown={(e) => e.key === "Enter" ? onAcceptDescriptionChanged() : null}
+                            />
+                            <IconButton type="button" id={item._id} onClick={onAcceptDescriptionChanged}><DownloadDoneIcon /></IconButton>
                         </Box>
                         :
                         <Typography variant="body2" color="text.secondary"
                             onDoubleClick={() => setEditMode({ ...editMode, description: true })}
                             onTouchEnd={() => setEditMode({ ...editMode, description: true })}
                         >
-                            {description}
+                            {form.description}
                         </Typography>
                 }
             </CardContent>
             <CardActions sx={{ display: "flex", justifyContent: "space-between" }}>
                 <ButtonGroup>
                     <IconButton type="button"><PushPinIcon /></IconButton>
-                    <IconButton type="button"><DeleteIcon /></IconButton>
+                    <IconButton type="button" onClick={deleteTodo} name={item._id}><DeleteIcon /></IconButton>
                 </ButtonGroup>
                 <Box textAlign="center">
                     <Typography fontSize={10}>{time}</Typography>
