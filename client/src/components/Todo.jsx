@@ -9,7 +9,6 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import DownloadDoneIcon from '@mui/icons-material/DownloadDone';
 import ColorLensOutlinedIcon from '@mui/icons-material/ColorLensOutlined';
-import { useTodos } from "../hooks/use.todos";
 
 
 function dateNormalaize(createdAt) {
@@ -19,11 +18,10 @@ function dateNormalaize(createdAt) {
     return { date, time }
 }
 
-export const TodoCard = ({ item }) => {
+export const TodoCard = ({ item, fetchTodos }) => {
     const { dispatch } = useContext(AppContext);
     const { requestApi } = useAxios();
     const { title, description, createdAt } = item;
-    const { deleteTodo, updateTodoTitle } = useTodos()
 
     const [form, setForm] = useState({
         title, description
@@ -36,20 +34,22 @@ export const TodoCard = ({ item }) => {
 
     const { date, time } = useMemo(() => dateNormalaize(createdAt));
 
-    function onDeleteTodo() {
+    async function onDeleteTodo() {
         const todoid = item._id;
 
         if (!todoid) return;
-        deleteTodo({ todoid })
+
+        await requestApi("/api/todo/delete", "DELETE", { todoid });
+        fetchTodos()
     }
 
-    function onAcceptTitleChanged() {
+    async function onAcceptTitleChanged() {
         const todoid = item._id;
 
         if (!todoid) return;
-        updateTodoTitle({ todoid, title: form.title });
-
+        await requestApi("/api/todo/update-title", "PUT", { todoid, title: form.title });
         setEditMode({ ...editMode, title: false })
+        fetchTodos()
     }
 
     async function onAcceptDescriptionChanged() {
@@ -57,9 +57,13 @@ export const TodoCard = ({ item }) => {
 
         if (!todoid) return;
         setEditMode({ ...editMode, description: false })
-        const { data } = await requestApi("/api/todo/update-description", "PUT", { todoid, description: form.description });
+        await requestApi("/api/todo/update-description", "PUT", { todoid, description: form.description });
+    }
 
-        dispatch({ type: "SET_MESSAGE", payload: data.message })
+    async function onTodoPin() {
+        const todoid = item._id;
+        await requestApi("/api/todo/pin", "PUT", { todoid, pinned: !item.isPinned });
+        fetchTodos()
     }
 
     return (
@@ -111,10 +115,14 @@ export const TodoCard = ({ item }) => {
             </CardContent>
             {<CardActions sx={{ display: "flex", justifyContent: "space-between", opacity: showToolbar, transition: "all .3s" }}>
                 <ButtonGroup>
-                    <IconButton type="button"><PushPinOutlinedIcon /></IconButton>
+                    <IconButton type="button" onClick={onTodoPin}><PushPinOutlinedIcon /></IconButton>
                     <IconButton type="button"><ColorLensOutlinedIcon /></IconButton>
                     <IconButton type="button" onClick={onDeleteTodo} name={item._id}><DeleteOutlineOutlinedIcon /></IconButton>
                 </ButtonGroup>
+                <Box textAlign="center">
+                    <Typography sx={{ fontSize: 12 }}>  {date}</Typography>
+                    <Typography sx={{ fontSize: 12 }}>  {time}</Typography>
+                </Box>
             </CardActions>}
         </Card>
     )

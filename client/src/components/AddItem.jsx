@@ -7,7 +7,7 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { useTodos } from "../hooks/use.todos";
+import { useAxios } from "../api/api";
 
 const style = {
     main: {
@@ -31,12 +31,13 @@ const style = {
 export const AddItem = () => {
     const { state, dispatch } = useContext(AppContext);
     const { isDarkTheme } = state;
-    const { createTodo } = useTodos();
+
 
     const [showForm, setShowForm] = useState(false);
     const [descState, setDescState] = useState("");
     const [title, setTitle] = useState("");
     const [hiddenToolbar, setHiddenToolbar] = useState(true);
+    const { requestApi } = useAxios();
 
 
     function onDecodeDrafjs() {
@@ -58,9 +59,14 @@ export const AddItem = () => {
         setShowForm(false);
     }
 
-    function onCreateTodo() {
-        if (!title && !onDecodeDrafjs()) return;
-        createTodo({ title, description: onDecodeDrafjs() });
+    async function onCreateTodo() {
+        const description = onDecodeDrafjs()
+        if (!title && !description) return;
+        onDiscard()
+        await requestApi("/api/todo/create", "POST", { title, description })
+        const { data } = await requestApi("/api/todo/todos");
+        dispatch({ type: "SET_TODOS", payload: data.todos });
+        dispatch({ type: "SET_PINNED", payload: data.pinned });
     }
 
     return (
@@ -74,7 +80,6 @@ export const AddItem = () => {
                         onClick={() => setShowForm(true)}
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-
                     >
                     </TextField>
                     {showForm && <Box sx={{ marginTop: !hiddenToolbar ? 4 : 0 }}>
@@ -86,10 +91,8 @@ export const AddItem = () => {
                             placeholder="Take a note..."
                             onEditorStateChange={setDescState}
                             toolbarHidden={hiddenToolbar}
-                            onBlur={onCreateTodo}
                         />
                         <Box sx={{ padding: 1, display: 'flex', justifyContent: "space-between" }}>
-
                             <Box>
                                 <ButtonGroup sx={{}}>
                                     <IconButton onClick={() => setHiddenToolbar(!hiddenToolbar)}><AutoFixHighIcon /> </IconButton>
@@ -100,6 +103,7 @@ export const AddItem = () => {
                             <Box>
                                 <ButtonGroup>
                                     <Button variant="text" type="button" onClick={onDiscard}>Close</Button>
+                                    <Button variant="outlined" type="button" onClick={onCreateTodo}>Create</Button>
                                 </ButtonGroup>
                             </Box>
                         </Box>

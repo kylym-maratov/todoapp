@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../store";
 import styled from "@emotion/styled";
 import { TodoCard, TodoList } from "./Todo";
-import { useTodos } from "../hooks/use.todos";
+import { useAxios } from "../api/api";
 
 const style = {
     menu: {
@@ -24,27 +24,46 @@ const Item = styled(Paper)(({ theme }) => ({
 
 
 export const Todos = () => {
-    const { state } = useContext(AppContext);
-    const { todos, loading } = state;
+    const { state, dispatch } = useContext(AppContext);
+    const { todos, loading, pinned } = state;
     const [view, setView] = useState("card");
-    const { fetchTodos } = useTodos()
+    const { requestApi } = useAxios();
 
-    useEffect(() => { fetchTodos() }, [view]);
+    useEffect(() => {
+        fetchTodos();
+    }, []);
+
+    async function fetchTodos() {
+        const { data } = await requestApi("/api/todo/todos");
+        dispatch({ type: "SET_TODOS", payload: data.todos });
+        dispatch({ type: "SET_PINNED", payload: data.pinned });
+    }
 
     return (
         <Box>
+            <Box sx={{ ...style.menu }}>
+                {pinned.length ? <Typography>Pinned</Typography> : null}
+                <ButtonGroup >
+                    <IconButton type="button" onClick={() => setView("card")} >
+                        <DashboardIcon />
+                    </IconButton>
+                    <IconButton type="button" onClick={() => setView("list")}>
+                        <FormatListBulletedIcon />
+                    </IconButton>
+                </ButtonGroup>
+            </Box>
+            {pinned.length ? <Box sx={{ marginTop: 3 }}>
+                <Grid container sx={{ display: "flex", justifyContent: "center" }}>
+                    {pinned.map((item) => (
+                        <Grid key={item._id}  >
+                            <Item><TodoCard item={item} fetchTodos={fetchTodos} /></Item>
+                        </Grid>
+                    ))}
+                </Grid>
+            </Box> : null}
             {todos.length ?
                 <Box>
-                    <Box sx={{ ...style.menu }}>
-                        <ButtonGroup >
-                            <IconButton type="button" onClick={() => setView("card")} >
-                                <DashboardIcon />
-                            </IconButton>
-                            <IconButton type="button" onClick={() => setView("list")}>
-                                <FormatListBulletedIcon />
-                            </IconButton>
-                        </ButtonGroup>
-                    </Box>
+
                     {view === "list" ?
                         <Box sx={{ marginTop: 3 }}>
                             {todos.map((item, key) => (
@@ -56,7 +75,7 @@ export const Todos = () => {
                             <Grid container sx={{ display: "flex", justifyContent: "center" }}>
                                 {todos.map((item, key) => (
                                     <Grid key={item._id}  >
-                                        <Item><TodoCard item={item} /></Item>
+                                        <Item><TodoCard item={item} fetchTodos={fetchTodos} /></Item>
                                     </Grid>
                                 ))}
                             </Grid>
@@ -64,11 +83,11 @@ export const Todos = () => {
                     }
                 </Box> :
                 <Box display="flex" justifyContent="center">
-                    <Typography fontWeight="bold">Getting todos...</Typography>
+                    {loading && <Typography fontWeight="bold">Getting todos...</Typography>}
                 </Box>
             }
             {
-                !todos.length && !loading && <Typography sx={{ textAlign: "center", fontSize: 14 }}>
+                !todos.length && !pinned.length && !loading && <Typography sx={{ textAlign: "center", fontSize: 14 }}>
                     You don't have any tasks created yet, you can create a new task above in the input box. If something is not clear go to the info page
                 </Typography>
             }

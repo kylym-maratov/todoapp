@@ -56,6 +56,11 @@ export const reducer = (state, action) => {
                 ...state,
                 todos: action.payload
             }
+        case "SET_PINNED":
+            return {
+                ...state,
+                pinned: action.payload
+            }
         default:
             return state;
     }

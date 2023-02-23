@@ -3,7 +3,7 @@ require("dotenv").config();
 
 function generateToken(data) {
     return new Promise((res, rej) => {
-        jwt.sign(data, process.env.TOKEN_SECRET, { expiresIn: 60 * 60 }, (err, token) => {
+        jwt.sign(data, process.env.TOKEN_SECRET, { expiresIn: "30d" }, (err, token) => {
             if (err) rej(err);
 
             res(token);

@@ -5,7 +5,7 @@ import { useAxios } from "../api/api";
 import { AddItem } from "../components/AddItem";
 import { Header } from "../components/Header";
 import { Todos } from "../components/Todos";
-import { useTodos } from "../hooks/use.todos";
+
 import { AppContext } from "../store";
 
 const style = {
