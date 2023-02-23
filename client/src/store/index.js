@@ -3,7 +3,7 @@ import { initialAppState } from "./app";
 import { initialTodoState } from "./todos";
 import { initialUserState } from "./user";
 
-export const initialState = {
+export const store = {
     ...initialAppState,
     ...initialUserState,
     ...initialTodoState

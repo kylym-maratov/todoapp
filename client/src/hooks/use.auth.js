@@ -5,7 +5,6 @@ import { destroyLocalItem, getLocalItem, setLocalItem, updateLocalItem } from ".
 export const useAuth = () => {
     const { dispatch, state } = useContext(AppContext);
 
-
     useEffect(() => {
         const userData = getLocalItem("userdata");
         const accessToken = getLocalItem("accesstoken");

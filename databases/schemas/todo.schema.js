@@ -6,5 +6,6 @@ module.exports = model("todos", new Schema({
     isDeleted: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false, required: true },
     isPinned: { type: Boolean, default: false, required: true },
-    static: Object
+    static: Object,
+    background: { type: "String", default: "none" }
 }, { timestamps: true }));

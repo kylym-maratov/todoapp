@@ -7,7 +7,7 @@ import { UserBlock } from "./UserBlock";
 
 const style = {
     header: {
-        padding: "20px 0px",
+        padding: "15px 0px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center"
@@ -21,7 +21,8 @@ const style = {
 
 export const Header = () => {
     const { state } = useContext(AppContext);
-    const { userData } = state;
+
+
     return (
         <Box sx={{ ...style.header }}>
             <Typography component="h1" fontSize={24} fontWeight="bold">

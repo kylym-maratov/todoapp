@@ -5,6 +5,7 @@ import { useAxios } from "../api/api";
 import { AddItem } from "../components/AddItem";
 import { Header } from "../components/Header";
 import { Todos } from "../components/Todos";
+import { useTodos } from "../hooks/use.todos";
 import { AppContext } from "../store";
 
 const style = {
@@ -19,24 +20,16 @@ const style = {
 }
 
 export default function HomePape() {
-    const { dispatch, state } = useContext(AppContext);
-    const { requestApi } = useAxios();
-
-    async function fetchTodos() {
-        const { data } = await requestApi("/api/todo/todos");
-        dispatch({ type: "SET_TODOS", payload: data.todos });
-    }
-
 
     return (
         <>
             <Container>
                 <Header />
                 <Box sx={{ ...style.addItem }}>
-                    <AddItem fetchTodos={fetchTodos} />
+                    <AddItem />
                 </Box>
                 <Box sx={{ ...style.todos }}>
-                    <Todos fetchTodos={fetchTodos} />
+                    <Todos />
                 </Box>
             </Container>
         </>

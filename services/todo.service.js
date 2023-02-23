@@ -3,6 +3,21 @@ const todoSchema = require("../databases/schemas/todo.schema");
 
 class ToodService {
 
+    async pin(req, res, next) {
+        try {
+            const { todoid, pinned } = req.body;
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+            const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { isPinned: pinned } }, { new: true });
+
+            return res.json({ message: "Todo pinned updated", todo })
+        } catch (e) { next(e) }
+    }
+
     async updateTitle(req, res, next) {
         try {
             const { title, todoid } = req.body;
@@ -57,15 +72,19 @@ class ToodService {
             const user = await userSchema.findOne({ _id: userid });
 
             const todos = [];
+            const pinned = [];
 
             for (let todoid of user.todos) {
                 const todo = await todoSchema.findOne({ _id: todoid });
-                if (todo) {
+                if (todo && !todo.isPinned) {
                     todos.push(todo);
+                }
+                if (todo && todo.isPinned) {
+                    pinned.push(todo);
                 }
             }
 
-            return res.json({ message: "OK", todos });
+            return res.json({ message: "OK", todos, pinned });
         } catch (e) { next(e) }
     }
 

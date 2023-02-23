@@ -3,5 +3,7 @@
 
 
 export const initialTodoState = {
-    todos: []
+    todos: [],
+    pinned: [],
+
 }
