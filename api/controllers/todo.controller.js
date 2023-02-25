@@ -10,5 +10,6 @@ todoController.delete("/delete", isTodoIdMiddlware.filter((item, i) => i !== 1 &
 todoController.put("/update-title", isTodoIdMiddlware.filter((item, i) => i !== 2), todoSerivce.updateTitle);
 todoController.put("/update-description", isTodoIdMiddlware.filter((item, i) => i !== 1), todoSerivce.updateDescritpion)
 todoController.put("/pin", [isTodoIdMiddlware.filter((item, i) => i !== 1 && i !== 2)], todoSerivce.pin)
+todoController.put("/set-color", isTodoIdMiddlware.filter((item, i) => i !== 1 && i !== 2), todoSerivce.setColor);
 
 module.exports = todoController;

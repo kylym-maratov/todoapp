@@ -3,6 +3,24 @@ const todoSchema = require("../databases/schemas/todo.schema");
 
 class ToodService {
 
+    async setColor(req, res, next) {
+
+        try {
+            const { color, todoid } = req.body;
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+            const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { background: color } }, { new: true });
+
+            return res.json({ message: "Todo color updated", todo })
+        } catch (e) {
+            next(e)
+        }
+    }
+
     async pin(req, res, next) {
         try {
             const { todoid, pinned } = req.body;
