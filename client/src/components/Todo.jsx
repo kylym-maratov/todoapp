@@ -19,7 +19,7 @@ function dateNormalaize(createdAt) {
 }
 
 export const TodoCard = ({ item, fetchTodos }) => {
-    const { dispatch } = useContext(AppContext);
+    const { state } = useContext(AppContext);
     const { requestApi } = useAxios();
     const { title, description, createdAt } = item;
     const [viewColorPicker, setViewColorPicker] = useState(false);
@@ -83,7 +83,7 @@ export const TodoCard = ({ item, fetchTodos }) => {
                 onMouseLeave={() => setShowToolbar(0)}
                 style={{ background: item.background ? item.background : "none" }}
             >
-                <CardContent>
+                <CardContent >
                     {
                         editMode.title
                             ?
@@ -109,7 +109,7 @@ export const TodoCard = ({ item, fetchTodos }) => {
                             ?
                             <Box display="flex">
                                 <TextareaAutosize
-                                    style={{ width: "100%", resize: "vertical", background: "none", color: "gray", padding: 10, fontSize: 14 }}
+                                    style={{ width: "100%", resize: "vertical", background: "none", color: state.isDarkTheme ? "white" : "black", padding: 10, fontSize: 14 }}
                                     type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                                     onKeyDown={(e) => e.key === "Enter" ? onAcceptDescriptionChanged() : null}
                                 />
