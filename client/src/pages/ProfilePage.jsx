@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { Container } from "@mui/system";
+
 import React, { useEffect, useState } from "react";
 import { useAxios } from "../api/api";
 import { Header } from "../components/Header";
@@ -17,7 +17,7 @@ export default function ProfilePage() {
     }, [])
 
     return (
-        <Container>
+        <>
             <Header />
             {user &&
                 <Box display="flex" justifyContent="center" marginTop={10}>
@@ -39,6 +39,6 @@ export default function ProfilePage() {
                         </Typography>
                     </Box>
                 </Box>}
-        </Container>
+        </>
     )
 }

@@ -9,6 +9,7 @@ import UseRoutes from "./routes/use.routes";
 import { SpeedDialComponent } from "./components/SpeeDial";
 import { AlertComponent } from "./components/Alert";
 import { Menu } from "./components/Menu";
+import { Container } from "@mui/system";
 
 function App() {
   const [state, dispatch] = React.useReducer(reducer, store);
@@ -16,17 +17,19 @@ function App() {
   const routes = UseRoutes(!!accessToken);
 
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      <ThemeProvider theme={isDarkTheme ? darkTheme : lightTheme}>
-        <CssBaseline />
-        <BrowserRouter>
-          {routes}
-        </BrowserRouter>
-      </ThemeProvider>
-      <AlertComponent />
-      {!!accessToken && <SpeedDialComponent />}
-      <Menu />
-    </AppContext.Provider>
+    <Container>
+      <AppContext.Provider value={{ state, dispatch }}>
+        <ThemeProvider theme={isDarkTheme ? darkTheme : lightTheme}>
+          <CssBaseline />
+          <BrowserRouter>
+            {routes}
+            <Menu />
+          </BrowserRouter>
+          <AlertComponent />
+          {!!accessToken && <SpeedDialComponent />}
+        </ThemeProvider>
+      </AppContext.Provider>
+    </Container>
   );
 }
 

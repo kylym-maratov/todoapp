@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Button, ButtonGroup, Card, CardActions, CardContent, IconButton, TextareaAutosize, TextField, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, ButtonGroup, Card, CardActions, CardContent, Checkbox, IconButton, TextareaAutosize, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system"
 import { useAxios } from "../api/api"
 import { useContext, useMemo, useState } from "react";
@@ -19,7 +19,7 @@ function dateNormalaize(createdAt) {
 }
 
 export const TodoCard = ({ item, fetchTodos }) => {
-    const { state } = useContext(AppContext);
+    const { state, dispatch } = useContext(AppContext);
     const { requestApi } = useAxios();
     const { title, description, createdAt } = item;
     const [viewColorPicker, setViewColorPicker] = useState(false);
@@ -34,15 +34,16 @@ export const TodoCard = ({ item, fetchTodos }) => {
 
     const [showToolbar, setShowToolbar] = useState(0);
 
-    const { date, time } = useMemo(() => dateNormalaize(createdAt));
+    const { date, time } = useMemo(() => dateNormalaize(createdAt), []);
 
     async function onDeleteTodo() {
         const todoid = item._id;
 
         if (!todoid) return;
 
-        await requestApi("/api/todo/delete", "DELETE", { todoid });
+        const { data } = await requestApi("/api/todo/delete", "DELETE", { todoid });
         fetchTodos()
+        dispatch({ type: "SET_MESSAGE", payload: data.message });
     }
 
     async function onAcceptTitleChanged() {
@@ -75,8 +76,26 @@ export const TodoCard = ({ item, fetchTodos }) => {
         fetchTodos()
     }
 
+    async function setCompleted() {
+        const todoid = item._id;
+        await requestApi("/api/todo/set-completed", "PUT", { todoid, completed: !item.isCompleted });
+        fetchTodos()
+    }
+
+
+    async function restoreTodo() {
+        const todoid = item._id;
+        const { data } = await requestApi("/api/todo/restore-todo", "PUT", { todoid });
+        fetchTodos()
+        dispatch({ type: "SET_MESSAGE", payload: data.message });
+    }
+
     return (
         <>
+            {item.isDeleted && <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography>Todo deleted</Typography>
+                <Button type="button" variant="text" onClick={restoreTodo}>Restore</Button>
+            </Box>}
             <Card
                 sx={{ width: 350, borderRadius: 4 }}
                 onMouseEnter={() => setShowToolbar(1)}
@@ -129,6 +148,7 @@ export const TodoCard = ({ item, fetchTodos }) => {
                         <IconButton type="button" onClick={onTodoPin}><PushPinOutlinedIcon /></IconButton>
                         <IconButton type="button" onClick={() => setViewColorPicker(!viewColorPicker)}><ColorLensOutlinedIcon /></IconButton>
                         <IconButton type="button" onClick={onDeleteTodo} name={item._id}><DeleteOutlineOutlinedIcon /></IconButton>
+                        <Checkbox checked={item.isCompleted} inputProps={{ 'aria-label': 'controlled' }} onClick={setCompleted} />
                     </ButtonGroup>
                     <Box textAlign="center">
                         <Typography sx={{ fontSize: 12 }}>  {date}</Typography>
@@ -148,10 +168,9 @@ export const TodoCard = ({ item, fetchTodos }) => {
     )
 }
 
-
 export const TodoList = ({ item }) => {
     const { title, description, createdAt } = item;
-    const { date, time } = useMemo(() => dateNormalaize(createdAt));
+    const { date, time } = useMemo(() => dateNormalaize(createdAt), []);
 
     return (
         <>

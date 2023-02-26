@@ -3,6 +3,25 @@ const todoSchema = require("../databases/schemas/todo.schema");
 
 class ToodService {
 
+
+    async setCompleted(req, res, next) {
+
+        try {
+            const { completed, todoid } = req.body;
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+            const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { isCompleted: completed } }, { new: true });
+
+            return res.json({ message: "Todo color updated", todo })
+        } catch (e) {
+            next(e)
+        }
+    }
+
     async setColor(req, res, next) {
 
         try {
@@ -66,6 +85,22 @@ class ToodService {
         } catch (e) { next(e) }
     }
 
+    async restoreTodo(req, res, next) {
+        try {
+            const { todoid } = req.body;
+            const userid = req.userid;
+
+            const user = await userSchema.findOne({ _id: userid });
+
+            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+            await todoSchema.updateOne({ _id: todoid }, { $set: { isDeleted: false } });
+
+            return res.json({ message: "Todo restored" });
+        } catch (e) { next(e) }
+    }
+
+
     async deleteTodo(req, res, next) {
         try {
             const { todoid } = req.body;
@@ -75,11 +110,9 @@ class ToodService {
 
             if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
-            await todoSchema.deleteOne({ _id: todoid });
+            await todoSchema.updateOne({ _id: todoid }, { $set: { isDeleted: true } });
 
-            await userSchema.updateOne({ _id: userid }, { $pull: { todos: todoid } });
-
-            return res.json({ message: "Todo deleted" });
+            return res.json({ message: "Todo moved to trash" });
         } catch (e) { next(e) }
     }
 
@@ -91,18 +124,24 @@ class ToodService {
 
             const todos = [];
             const pinned = [];
+            const deleted = [];
 
             for (let todoid of user.todos) {
                 const todo = await todoSchema.findOne({ _id: todoid });
-                if (todo && !todo.isPinned) {
-                    todos.push(todo);
-                }
                 if (todo && todo.isPinned) {
                     pinned.push(todo);
+                    continue
+                }
+                if (todo && todo.isDeleted) {
+                    deleted.push(todo);
+                    continue
+                }
+                if (todo) {
+                    todos.push(todo);
                 }
             }
 
-            return res.json({ message: "OK", todos, pinned });
+            return res.json({ message: "OK", todos, pinned, deleted });
         } catch (e) { next(e) }
     }
 

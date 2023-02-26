@@ -61,6 +61,11 @@ export const reducer = (state, action) => {
                 ...state,
                 pinned: action.payload
             }
+        case "SET_DELETED":
+            return {
+                ...state,
+                deleted: action.payload
+            }
         default:
             return state;
     }

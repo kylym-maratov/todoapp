@@ -3,6 +3,7 @@ import HomePape from "../pages/HomePage";
 import { LoginPage } from "../pages/LoginPage";
 import ProfilePage from "../pages/ProfilePage";
 import { SignupPage } from "../pages/SignupPage";
+import TrashPage from "../pages/TrashPage";
 
 export default function UseRoutes(isAuth) {
 
@@ -11,6 +12,7 @@ export default function UseRoutes(isAuth) {
             <Routes>
                 <Route path="/" element={<HomePape />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/trash" element={<TrashPage />} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         );
