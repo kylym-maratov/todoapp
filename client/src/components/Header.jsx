@@ -3,7 +3,7 @@ import { Box } from "@mui/system";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AppContext } from "../store";
-
+import logo from "../assets/logo.png";
 import { UserBlock } from "./UserBlock";
 
 const style = {
@@ -25,9 +25,13 @@ export const Header = () => {
     return (
         <Box sx={{ ...style.header }}>
             <Link to="/" style={{ color: state.isDarkTheme ? "white" : "black", textDecoration: "none" }}>
-                <Typography component="h1" fontSize={24} fontWeight="bold">
-                    TodoApp <Typography fontSize={11}>Beta version</Typography>
-                </Typography></Link>
+                <Box display="flex" alignItems="center">
+                    <img style={{ width: 45, marginRight: 5 }} src={logo} />
+                    <Typography component="h1" fontSize={24} fontWeight="bold">
+                        TodoApp <Typography fontSize={11}>Beta version</Typography>
+                    </Typography>
+                </Box>
+            </Link>
             <Box sx={{ ...style.section }}>
                 <UserBlock />
             </Box>
