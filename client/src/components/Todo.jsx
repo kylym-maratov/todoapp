@@ -141,6 +141,7 @@ export const TodoCard = ({ item, fetchTodos }) => {
                 <ButtonGroup>
                     <Button type="button" variant="contained" onClick={setTodoColor}>Save</Button>
                     <Button type="button" variant="contained" onClick={() => { setColorPicker(""); setTodoColor() }}>Reset</Button>
+                    <Button type="button" variant="contained" onClick={() => setViewColorPicker(false)}>Cancel</Button>
                 </ButtonGroup>
             </Box>}
         </>

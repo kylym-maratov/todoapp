@@ -19,7 +19,6 @@ const style = {
     }
 }
 
-
 export const Header = () => {
     const { state } = useContext(AppContext);
 
@@ -27,7 +26,7 @@ export const Header = () => {
         <Box sx={{ ...style.header }}>
             <Link to="/" style={{ color: state.isDarkTheme ? "white" : "black", textDecoration: "none" }}>
                 <Typography component="h1" fontSize={24} fontWeight="bold">
-                    TodoApp
+                    TodoApp <Typography fontSize={11}>Beta version</Typography>
                 </Typography></Link>
             <Box sx={{ ...style.section }}>
                 <UserBlock />
