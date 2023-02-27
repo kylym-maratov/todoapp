@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../store";
 import styled from "@emotion/styled";
 import { TodoCard, TodoList } from "./Todo";
-import { useAxios } from "../api/api";
+import { useTodos } from "../hooks/use.todos";
 
 const style = {
     menu: {
@@ -24,20 +24,9 @@ const Item = styled(Paper)(({ theme }) => ({
 
 
 export const Todos = () => {
-    const { state, dispatch } = useContext(AppContext);
+    const { state } = useContext(AppContext);
     const { todos, loading, pinned } = state;
     const [view, setView] = useState("card");
-    const { requestApi } = useAxios();
-
-    useEffect(() => {
-        fetchTodos();
-    }, []);
-
-    async function fetchTodos() {
-        const { data } = await requestApi("/api/todo/todos");
-        dispatch({ type: "SET_TODOS", payload: data.todos });
-        dispatch({ type: "SET_PINNED", payload: data.pinned });
-    }
 
     return (
         <Box>
@@ -56,7 +45,7 @@ export const Todos = () => {
                 <Grid container sx={{ display: "flex", justifyContent: "center" }}>
                     {pinned.map((item) => (
                         <Grid key={item._id}  >
-                            <Item><TodoCard item={item} fetchTodos={fetchTodos} /></Item>
+                            <Item><TodoCard item={item} /></Item>
                         </Grid>
                     ))}
                 </Grid>
@@ -75,7 +64,7 @@ export const Todos = () => {
                             <Grid container sx={{ display: "flex", justifyContent: "center" }}>
                                 {todos.map((item, key) => (
                                     <Grid key={item._id}  >
-                                        <Item><TodoCard item={item} fetchTodos={fetchTodos} /></Item>
+                                        <Item><TodoCard item={item} /></Item>
                                     </Grid>
                                 ))}
                             </Grid>

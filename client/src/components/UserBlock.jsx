@@ -9,6 +9,7 @@ import { Box } from "@mui/system";
 import { Loading } from "./Loading";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAxios } from "../api/api";
+import { useTodos } from "../hooks/use.todos";
 
 function stringToColor(string) {
     let hash = 0;
@@ -44,7 +45,7 @@ export const UserBlock = () => {
     const { state, dispatch } = useContext(AppContext);
     const { userData, loading } = state;
     const [welcome, setWelcome] = useState(location.pathname === "/");
-    const { requestApi } = useAxios();
+    const { setLoadConent } = useTodos()
 
     useEffect(() => {
         const timeout = setTimeout(() => setWelcome(false), 5000);
@@ -59,15 +60,10 @@ export const UserBlock = () => {
 
     async function fetchContent() {
         if (location.pathname === "/") {
-            const { data } = await requestApi("/api/todo/todos");
-            dispatch({ type: "SET_TODOS", payload: data.todos });
-            dispatch({ type: "SET_PINNED", payload: data.pinned });
-            return
+            return setLoadConent(true)
         }
 
         if (location.pathname === "/profile") {
-            const { data } = await requestApi("/api/user/get-user");
-            dispatch({ type: "SET_USER", payload: data.user });
             return
         }
     }

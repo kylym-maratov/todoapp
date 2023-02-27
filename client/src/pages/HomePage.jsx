@@ -1,10 +1,11 @@
 
 import { Box } from "@mui/system";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { AddItem } from "../components/AddItem";
 import { Header } from "../components/Header";
 import { Todos } from "../components/Todos";
+import { useTodos } from "../hooks/use.todos";
 
 
 const style = {
@@ -19,6 +20,11 @@ const style = {
 }
 
 export default function HomePape() {
+    const { setLoadConent } = useTodos()
+
+    useEffect(() => {
+        setLoadConent(true)
+    }, []);
 
     return (
         <>

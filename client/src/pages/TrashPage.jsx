@@ -5,8 +5,8 @@ import { useContext, useEffect } from "react";
 import { useAxios } from "../api/api";
 import { Header } from "../components/Header";
 import { TodoCard } from "../components/Todo";
+import { useTodos } from "../hooks/use.todos";
 import { AppContext } from "../store";
-
 
 const Item = styled(Paper)(({ theme }) => ({
     background: "none",
@@ -15,19 +15,14 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export default function TrashPage() {
-    const { dispatch, state } = useContext(AppContext);
+    const { state } = useContext(AppContext);
     const { deleted } = state;
-    const { requestApi } = useAxios()
 
-    useEffect(() => { fetchTodos() }, []);
+    const { setLoadConent } = useTodos()
 
-    async function fetchTodos() {
-        const { data } = await requestApi("/api/todo/todos");
-        dispatch({ type: "SET_TODOS", payload: data.todos });
-        dispatch({ type: "SET_PINNED", payload: data.pinned });
-        dispatch({ type: "SET_DELETED", payload: data.deleted });
-    }
-
+    useEffect(() => {
+        setLoadConent(true)
+    }, []);
     return (
         <>
             <Header />
@@ -35,7 +30,7 @@ export default function TrashPage() {
                 {deleted.length ? <Grid container sx={{ display: "flex", justifyContent: "center" }}>
                     {deleted.map((item, key) => (
                         <Grid key={item._id} >
-                            <Item><TodoCard item={item} fetchTodos={fetchTodos} /></Item>
+                            <Item><TodoCard item={item} /></Item>
                         </Grid>
                     ))}
                 </Grid> : "Trash empty"}

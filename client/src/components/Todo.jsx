@@ -1,6 +1,5 @@
 import { Accordion, AccordionDetails, AccordionSummary, Button, ButtonGroup, Card, CardActions, CardContent, Checkbox, IconButton, TextareaAutosize, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system"
-import { useAxios } from "../api/api"
 import { useContext, useMemo, useState } from "react";
 import { AppContext } from "../store";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -10,6 +9,8 @@ import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import DownloadDoneIcon from '@mui/icons-material/DownloadDone';
 import ColorLensOutlinedIcon from '@mui/icons-material/ColorLensOutlined';
 import ColorPicker from "react-pick-color";
+import { useTodos } from "../hooks/use.todos";
+import { useLocation } from "react-router-dom";
 
 function dateNormalaize(createdAt) {
     const date = createdAt.split("T")[0];
@@ -18,13 +19,14 @@ function dateNormalaize(createdAt) {
     return { date, time }
 }
 
-export const TodoCard = ({ item, fetchTodos }) => {
-    const { state, dispatch } = useContext(AppContext);
-    const { requestApi } = useAxios();
+export const TodoCard = ({ item }) => {
+    const { state } = useContext(AppContext);
+    const { setTodoCompleted, setRestoreTodo, setTodoDelete, setTodoDescription, setTodoTitle, setTodoPin, setTodoColor, setTodoDeleteForever } = useTodos();
     const { title, description, createdAt } = item;
-    const [viewColorPicker, setViewColorPicker] = useState(false);
-    const [colorPicker, setColorPicker] = useState("#fff");
-
+    const [colorPicker, setColorPicker] = useState(false);
+    const [colorHex, setColorHex] = useState("#fff");
+    const [showToolbar, setShowToolbar] = useState(0);
+    const location = useLocation();
     const [form, setForm] = useState({
         title, description
     });
@@ -32,69 +34,54 @@ export const TodoCard = ({ item, fetchTodos }) => {
         title: false, description: false
     });
 
-    const [showToolbar, setShowToolbar] = useState(0);
-
     const { date, time } = useMemo(() => dateNormalaize(createdAt), []);
 
-    async function onDeleteTodo() {
-        const todoid = item._id;
 
-        if (!todoid) return;
-
-        const { data } = await requestApi("/api/todo/delete", "DELETE", { todoid });
-        fetchTodos()
-        dispatch({ type: "SET_MESSAGE", payload: data.message });
-    }
-
-    async function onAcceptTitleChanged() {
-        const todoid = item._id;
-
-        if (!todoid) return;
-        await requestApi("/api/todo/update-title", "PUT", { todoid, title: form.title });
+    function onAcceptTitle() {
+        setTodoTitle({ item, title: form.title })
         setEditMode({ ...editMode, title: false })
-        fetchTodos()
     }
 
-    async function onAcceptDescriptionChanged() {
-        const todoid = item._id;
-
-        if (!todoid) return;
+    function onAcceptDescription() {
+        setTodoDescription({ item, description: form.description })
         setEditMode({ ...editMode, description: false })
-        await requestApi("/api/todo/update-description", "PUT", { todoid, description: form.description });
     }
 
-    async function onTodoPin() {
-        const todoid = item._id;
-        await requestApi("/api/todo/pin", "PUT", { todoid, pinned: !item.isPinned });
-        fetchTodos()
+    function onTodoDelete() {
+        if (location.pathname === "/trash") {
+            return setTodoDeleteForever({ item });
+        }
+        setTodoDelete({ item });
+
     }
 
-    async function setTodoColor() {
-        const todoid = item._id;
-        setViewColorPicker(false);
-        await requestApi("/api/todo/set-color", "PUT", { todoid, color: colorPicker });
-        fetchTodos()
+    function onRestoreTodo() {
+        setRestoreTodo({ item })
     }
 
-    async function setCompleted() {
-        const todoid = item._id;
-        await requestApi("/api/todo/set-completed", "PUT", { todoid, completed: !item.isCompleted });
-        fetchTodos()
+    function onTodoColor() {
+        setTodoColor({ item, colorHex })
+        setColorPicker(false)
     }
 
-
-    async function restoreTodo() {
-        const todoid = item._id;
-        const { data } = await requestApi("/api/todo/restore-todo", "PUT", { todoid });
-        fetchTodos()
-        dispatch({ type: "SET_MESSAGE", payload: data.message });
+    function onTodoComplete() {
+        setTodoCompleted({ item })
     }
+
+    function onTodoPin() {
+        setTodoPin({ item })
+    }
+
+    function onOpenEditMode(value) {
+        setEditMode({ ...editMode, ...value })
+    }
+
 
     return (
         <>
             {item.isDeleted && <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Typography>Todo deleted</Typography>
-                <Button type="button" variant="text" onClick={restoreTodo}>Restore</Button>
+                <Button type="button" variant="text" onClick={onRestoreTodo}>Restore</Button>
             </Box>}
             <Card
                 sx={{ width: 350, borderRadius: 4 }}
@@ -110,15 +97,15 @@ export const TodoCard = ({ item, fetchTodos }) => {
                                 <TextField fullWidth
                                     type="text" value={form.title}
                                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                                    onKeyDown={(e) => e.key === "Enter" ? onAcceptTitleChanged() : null}
+                                    onKeyDown={(e) => e.key === "Enter" ? onAcceptTitle() : null}
                                 />
-                                <IconButton type="button" sx={{ marginTop: 1 }} onClick={onAcceptTitleChanged}><DownloadDoneIcon /></IconButton>
+                                <IconButton type="button" sx={{ marginTop: 1 }} onClick={onAcceptTitle}><DownloadDoneIcon /></IconButton>
                             </Box>
                             :
                             <Typography
                                 gutterBottom variant="h5" component="div"
-                                onDoubleClick={() => setEditMode({ ...editMode, title: true })}
-                                onTouchEnd={() => setEditMode({ ...editMode, title: true })}
+                                onDoubleClick={() => onOpenEditMode({ title: true })}
+                                onTouchEnd={() => onOpenEditMode({ title: true })}
                             >
                                 {form.title}
                             </Typography>
@@ -130,14 +117,14 @@ export const TodoCard = ({ item, fetchTodos }) => {
                                 <TextareaAutosize
                                     style={{ width: "100%", resize: "vertical", background: "none", color: state.isDarkTheme ? "white" : "black", padding: 10, fontSize: 14 }}
                                     type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                                    onKeyDown={(e) => e.key === "Enter" ? onAcceptDescriptionChanged() : null}
+                                    onKeyDown={(e) => e.key === "Enter" ? onAcceptDescription() : null}
                                 />
-                                <IconButton type="button" id={item._id} onClick={onAcceptDescriptionChanged}><DownloadDoneIcon /></IconButton>
+                                <IconButton type="button" id={item._id} onClick={onAcceptDescription}><DownloadDoneIcon /></IconButton>
                             </Box>
                             :
                             <Typography variant="body2" color="text.secondary"
-                                onDoubleClick={() => setEditMode({ ...editMode, description: true })}
-                                onTouchEnd={() => setEditMode({ ...editMode, description: true })}
+                                onDoubleClick={() => onOpenEditMode({ description: true })}
+                                onTouchEnd={() => onOpenEditMode({ description: true })}
                             >
                                 {form.description}
                             </Typography>
@@ -146,9 +133,9 @@ export const TodoCard = ({ item, fetchTodos }) => {
                 {<CardActions sx={{ display: "flex", justifyContent: "space-between", opacity: showToolbar, transition: "all .3s" }}>
                     <ButtonGroup>
                         <IconButton type="button" onClick={onTodoPin}><PushPinOutlinedIcon /></IconButton>
-                        <IconButton type="button" onClick={() => setViewColorPicker(!viewColorPicker)}><ColorLensOutlinedIcon /></IconButton>
-                        <IconButton type="button" onClick={onDeleteTodo} name={item._id}><DeleteOutlineOutlinedIcon /></IconButton>
-                        <Checkbox checked={item.isCompleted} inputProps={{ 'aria-label': 'controlled' }} onClick={setCompleted} />
+                        <IconButton type="button" onClick={() => setColorPicker(!colorPicker)}><ColorLensOutlinedIcon /></IconButton>
+                        <IconButton type="button" onClick={onTodoDelete} name={item._id}><DeleteOutlineOutlinedIcon /></IconButton>
+                        <Checkbox checked={item.isCompleted} inputProps={{ 'aria-label': 'controlled' }} onClick={onTodoComplete} />
                     </ButtonGroup>
                     <Box textAlign="center">
                         <Typography sx={{ fontSize: 12 }}>  {date}</Typography>
@@ -156,12 +143,12 @@ export const TodoCard = ({ item, fetchTodos }) => {
                     </Box>
                 </CardActions>}
             </Card>
-            {viewColorPicker && <Box sx={{ position: "absolute" }} >
-                <ColorPicker color={colorPicker} onChange={(color) => setColorPicker(color.hex)} />
+            {colorPicker && <Box sx={{ position: "absolute" }} >
+                <ColorPicker color={colorHex} onChange={(color) => setColorHex(color.hex)} />
                 <ButtonGroup>
-                    <Button type="button" variant="contained" onClick={setTodoColor}>Save</Button>
-                    <Button type="button" variant="contained" onClick={() => { setColorPicker(""); setTodoColor() }}>Reset</Button>
-                    <Button type="button" variant="contained" onClick={() => setViewColorPicker(false)}>Cancel</Button>
+                    <Button type="button" variant="contained" onClick={onTodoColor}>Save</Button>
+                    <Button type="button" variant="contained" onClick={() => { setColorHex(""); onTodoColor() }}>Reset</Button>
+                    <Button type="button" variant="contained" onClick={() => setColorPicker(false)}>Cancel</Button>
                 </ButtonGroup>
             </Box>}
         </>

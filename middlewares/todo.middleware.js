@@ -1,4 +1,5 @@
 const { check, validationResult } = require("express-validator");
+const userSchema = require("../databases/schemas/user.schema");
 
 const isTodoCorrectMiddleware = [
     check("title").notEmpty().withMessage("Title cannot be empty"),
@@ -30,4 +31,18 @@ const isTodoIdMiddlware = [
 ]
 
 
-module.exports = { isTodoCorrectMiddleware, isTodoIdMiddlware }
+const isTodoMiddlewware = async (req, res, next) => {
+    try {
+        const userid = req.userid;
+        const user = await userSchema.findOne({ _id: userid });
+        const { todoid } = req.body;
+
+        if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
+
+        next()
+    } catch (e) {
+        return res.status(500).json({ message: e.message });
+    }
+}
+
+module.exports = { isTodoCorrectMiddleware, isTodoIdMiddlware, isTodoMiddlewware }

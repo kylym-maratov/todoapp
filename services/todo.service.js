@@ -8,11 +8,6 @@ class ToodService {
 
         try {
             const { completed, todoid } = req.body;
-            const userid = req.userid;
-
-            const user = await userSchema.findOne({ _id: userid });
-
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { isCompleted: completed } }, { new: true });
 
@@ -26,11 +21,6 @@ class ToodService {
 
         try {
             const { color, todoid } = req.body;
-            const userid = req.userid;
-
-            const user = await userSchema.findOne({ _id: userid });
-
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { background: color } }, { new: true });
 
@@ -43,11 +33,8 @@ class ToodService {
     async pin(req, res, next) {
         try {
             const { todoid, pinned } = req.body;
-            const userid = req.userid;
 
-            const user = await userSchema.findOne({ _id: userid });
 
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { isPinned: pinned } }, { new: true });
 
@@ -58,11 +45,6 @@ class ToodService {
     async updateTitle(req, res, next) {
         try {
             const { title, todoid } = req.body;
-            const userid = req.userid;
-
-            const user = await userSchema.findOne({ _id: userid });
-
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { title } }, { new: true });
 
@@ -73,11 +55,7 @@ class ToodService {
     async updateDescritpion(req, res, next) {
         try {
             const { description, todoid } = req.body;
-            const userid = req.userid;
 
-            const user = await userSchema.findOne({ _id: userid });
-
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             const todo = await todoSchema.findOneAndUpdate({ _id: todoid }, { $set: { description } }, { new: true });
 
@@ -88,11 +66,6 @@ class ToodService {
     async restoreTodo(req, res, next) {
         try {
             const { todoid } = req.body;
-            const userid = req.userid;
-
-            const user = await userSchema.findOne({ _id: userid });
-
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             await todoSchema.updateOne({ _id: todoid }, { $set: { isDeleted: false } });
 
@@ -104,11 +77,6 @@ class ToodService {
     async deleteTodo(req, res, next) {
         try {
             const { todoid } = req.body;
-            const userid = req.userid;
-
-            const user = await userSchema.findOne({ _id: userid });
-
-            if (!user.todos.includes(todoid)) return res.status(400).json({ message: "Method not allowed" })
 
             await todoSchema.updateOne({ _id: todoid }, { $set: { isDeleted: true } });
 
@@ -142,6 +110,18 @@ class ToodService {
             }
 
             return res.json({ message: "OK", todos, pinned, deleted });
+        } catch (e) { next(e) }
+    }
+
+    async deleteTodoForever(req, res, next) {
+        try {
+            const userid = req.userid;
+            const { todoid } = req.body;
+
+            await userSchema.updateOne({ _id: userid }, { $pull: { todos: todoid } })
+            await todoSchema.deleteOne({ _id: todoid });
+
+            return res.json({ message: "Todo has been deleted" });
         } catch (e) { next(e) }
     }
 
