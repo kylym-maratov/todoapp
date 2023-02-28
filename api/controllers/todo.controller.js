@@ -15,5 +15,6 @@ todoController.put("/pin", [todoIdMiddlewrae, isTodoMiddlewware], todoSerivce.pi
 todoController.put("/set-color", [todoIdMiddlewrae, isTodoMiddlewware], todoSerivce.setColor);
 todoController.put("/set-completed", [todoIdMiddlewrae, isTodoMiddlewware], todoSerivce.setCompleted);
 todoController.delete("/delete-forever", [todoIdMiddlewrae, isTodoMiddlewware], todoSerivce.deleteTodoForever);
+todoController.put("/restore-todo", [todoIdMiddlewrae, isTodoMiddlewware], todoSerivce.restoreTodo);
 
 module.exports = todoController;
